@@ -1,3 +1,7 @@
-busybox-1.36.1/_install
+.gitignore
+busybox-1.36.1/
 linux/build
 .vscode/
+src_e1000/r4l_e1000_demo.d
+src_e1000/dump.dat
+
