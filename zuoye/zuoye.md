@@ -53,5 +53,6 @@
 ### 4.为一个rust的驱动模块编写一个函数
 
 ### 5.实现一个简单的rust驱动模块
+    - Q1:build.image中的echo "mknod /dev/cicv c 248 0" >> etc/init.d/rcS 所以设备号码是：248
 ![结果展示](./picture/12.png)
 
