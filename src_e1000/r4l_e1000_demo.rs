@@ -189,8 +189,11 @@ impl net::DeviceOperations for NetDevice {
         Ok(())
     }
 
-    fn stop(_dev: &net::Device, _data: &NetDevicePrvData) -> Result {
+    fn stop(dev: &net::Device, data: &NetDevicePrvData) -> Result {
         pr_info!("Rust for linux e1000 driver demo (net device stop)\n");
+        dev.netif_carrier_off();
+        dev.netif_stop_queue();
+
         Ok(())
     }
 
@@ -298,7 +301,6 @@ struct E1000DrvPrvData {
 impl driver::DeviceRemoval for E1000DrvPrvData {
     fn device_remove(&self) {
         pr_info!("Rust for linux e1000 driver demo (device_remove)\n");
-      
     }
 }
 

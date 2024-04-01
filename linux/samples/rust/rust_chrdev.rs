@@ -39,20 +39,25 @@ impl file::Operations for RustFile {
         )
     }
 
-    fn write(_this: &Self,_file: &file::File,_reader: &mut impl kernel::io_buffer::IoBufferReader,_offset:u64,) -> Result<usize> {
+    fn write(_this: &Self,_file: &file::File,_reader: &mut impl kernel::io_buffer::IoBufferReader,_offset:u64,) -> Result<usize> { 
+            // pr_info!("write_offset{}\n",_offset);
+            let mut globalmem = _this.inner.lock(); 
+            let len = _reader.len();
+            globalmem[0] = len as u8;
+            _reader.read_slice(&mut globalmem[1..=len])?;
+            // pr_info!("write_len{}\n",len);
+            Ok(len)
+        }
         
-        Ok(0)
-    }
-
-    fn read(_this: &Self,_file: &file::File,_writer: &mut impl kernel::io_buffer::IoBufferWriter,_offset:u64,) -> Result<usize> {
-        let mut globalmem = _this.inner.lock();
-        
-        globalmem[..5].copy_from_slice(b"Hello");
-        
-        _writer.write_slice(&globalmem[.._offset as usize])?;
-        Ok(_offset as usize)
-        //Err(EPERM)
-    }
+        fn read(_this: &Self,_file: &file::File,_writer: &mut impl kernel::io_buffer::IoBufferWriter,_offset:u64,) -> Result<usize> {
+            // pr_info!("read_offset{}\n",_offset);
+            let  globalmem = _this.inner.lock();
+            let len = globalmem[0] as usize;
+            _writer.write_slice(&globalmem[1..(len+1)])?;
+            // pr_info!("read_len{}\n",len);
+            // pr_info!("read_len{}\n",_writer.len());
+            Ok(len - _offset as usize)
+        }       
 }
 
 struct RustChrdev {

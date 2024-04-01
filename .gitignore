@@ -4,4 +4,8 @@ linux/build
 .vscode/
 src_e1000/r4l_e1000_demo.d
 src_e1000/dump.dat
-
+.idea/libraries/testsuite.xml
+.idea/cicv-r4l-3-ZhangJingYun2018.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
