@@ -51,6 +51,14 @@
 
 
 ### 4.为一个rust的驱动模块编写一个函数
+   - 在remove中对pci的设备进行释放（在pci.rs中添加释放函数）
+   - 在stop中添加对irq的释放
+   - 进行测试，测试结果如下：
+
+
+![结果展示](./picture/13.png)
+![结果展示](./picture/14.png)
+![结果展示](./picture/15.png)
 
 ### 5.实现一个简单的rust驱动模块
     - Q1:build.image中的echo "mknod /dev/cicv c 248 0" >> etc/init.d/rcS 所以设备号码是：248

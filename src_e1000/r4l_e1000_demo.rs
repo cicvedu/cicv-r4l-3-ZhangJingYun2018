@@ -193,7 +193,11 @@ impl net::DeviceOperations for NetDevice {
         pr_info!("Rust for linux e1000 driver demo (net device stop)\n");
         dev.netif_carrier_off();
         dev.netif_stop_queue();
-
+        data.e1000_hw_ops.e1000_reset_hw()?;
+         // Safety: store 在 irq_handler.load 之前，所以这里是安全的。
+        unsafe { Box::from_raw(data._irq_handler.load(core::sync::atomic::Ordering::Relaxed));}
+        drop(dev);
+        drop(data);
         Ok(())
     }
 
@@ -296,11 +300,13 @@ impl kernel::irq::Handler for E1000InterruptHandler {
 /// the private data for the adapter
 struct E1000DrvPrvData {
     _netdev_reg: net::Registration<NetDevice>,
+    bars: i32,
 }
 
 impl driver::DeviceRemoval for E1000DrvPrvData {
     fn device_remove(&self) {
         pr_info!("Rust for linux e1000 driver demo (device_remove)\n");
+      drop(self);
     }
 }
 
@@ -465,12 +471,15 @@ impl pci::Driver for E1000Drv {
             E1000DrvPrvData{
                 // Must hold this registration, or the device will be removed.
                 _netdev_reg: netdev_reg,
+                bars: bars,
             }
         )?)
     }
 
-    fn remove(data: &Self::Data) {
+    fn remove(dev: &mut pci::Device,data: &Self::Data) {
         pr_info!("Rust for linux e1000 driver demo (remove)\n");
+        dev.disable_device();
+        dev.release_selected_regions(data.bars);
         drop(data);
     }
 }
