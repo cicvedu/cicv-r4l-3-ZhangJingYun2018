@@ -64,3 +64,6 @@
     - Q1:build.image中的echo "mknod /dev/cicv c 248 0" >> etc/init.d/rcS 所以设备号码是：248
 ![结果展示](./picture/12.png)
 
+### 5. 项目小实验
+
+![结果展示](./picture/16.png)
