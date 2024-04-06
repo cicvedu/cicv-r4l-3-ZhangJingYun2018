@@ -193,10 +193,9 @@ impl net::DeviceOperations for NetDevice {
         pr_info!("Rust for linux e1000 driver demo (net device stop)\n");
         dev.netif_carrier_off();
         dev.netif_stop_queue();
-        data.e1000_hw_ops.e1000_reset_hw()?;
+        data.napi.disable();
          // Safety: store 在 irq_handler.load 之前，所以这里是安全的。
         unsafe { Box::from_raw(data._irq_handler.load(core::sync::atomic::Ordering::Relaxed));}
-        drop(dev);
         drop(data);
         Ok(())
     }
