@@ -5,12 +5,11 @@ use core::result::Result::Err;
 
 use kernel::prelude::*;
 use kernel::sync::Mutex;
-use kernel::{chrdev, file};
 use kernel::task::Task;
+use kernel::{chrdev, file};
 
 mod completionops;
-use completionops::{CompletionFileOps};
-
+use completionops::CompletionFileOps;
 
 module! {
   type: Completion,
@@ -27,7 +26,6 @@ static GLOBALMEM_BUF: Mutex<[u8; GLOBALMEM_SIZE]> = unsafe { Mutex::new([0u8; GL
 struct CompletionFile {
     data: &'static Mutex<[u8; GLOBALMEM_SIZE]>,
 }
-
 
 #[vtable]
 impl file::Operations for CompletionFile {
@@ -46,18 +44,12 @@ impl file::Operations for CompletionFile {
         reader: &mut impl kernel::io_buffer::IoBufferReader,
         _offset: u64,
     ) -> Result<usize> {
-        pr_info!(
-            "CompletionFile -pid={:?}--(write)\n",
-            Task::current().pid(),
-        );
+        pr_info!("CompletionFile -pid={:?}--(write)\n", Task::current().pid(),);
         let mut globalmem = this.data.lock();
-        pr_info!("CompletionFile(write-1)\n");
         let len = reader.len();
         globalmem[0] = len as u8;
         reader.read_slice(&mut globalmem[1..=len])?;
         CompletionFileOps::complete();
-        pr_info!("CompletionFile(write-2)\n");
-        // pr_info!("write_len{}\n",len);
         Ok(len)
     }
 
@@ -70,18 +62,12 @@ impl file::Operations for CompletionFile {
         if writer.is_empty() || offset > 0 {
             return Ok(0);
         }
-        pr_info!(
-            "CompletionFile -pid={:?}--(read)\n",
-            Task::current().pid(),
-        );
+        pr_info!("CompletionFile -pid={:?}--(read)\n", Task::current().pid(),);
         CompletionFileOps::wait_for_completion();
-        pr_info!("CompletionFile(read-1)\n");
         let globalmem = this.data.lock();
-        pr_info!("CompletionFile(read-2)\n");
         let len = globalmem[0] as usize;
         writer.write_slice(&globalmem[1..(len + 1)])?;
-        // pr_info!("read_len{}\n",len);
-        // pr_info!("read_len{}\n",_writer.len());
+
         Ok(len as usize)
     }
 }
@@ -93,7 +79,7 @@ struct Completion {
 impl kernel::Module for Completion {
     fn init(name: &'static CStr, module: &'static ThisModule) -> Result<Self> {
         pr_info!("Completion driver demo (init)");
-        CompletionFileOps::new()?;
+        // CompletionFileOps::new()?;
         CompletionFileOps::init_completion();
         let mut completion_reg = chrdev::Registration::new_pinned(name, 0, module)?;
         completion_reg.as_mut().register::<CompletionFile>()?;

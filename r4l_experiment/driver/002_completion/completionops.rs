@@ -8,7 +8,7 @@ pub(crate) struct CompletionFileOps(UnsafeCell<bindings::completion>);
 static mut COMPLETION_FILE_OPS: Option<Pin<UniqueArc<CompletionFileOps>>> = None;
 
 impl CompletionFileOps {
-    pub(crate) fn new() -> Result<()> {
+    fn new() -> Result<()> {
         pr_info!("CompletionFile(new)\n");
 
         // SAFETY: 给静态变量初始化。
@@ -21,6 +21,7 @@ impl CompletionFileOps {
     }
 
     pub(crate) fn init_completion() {
+        Self::new().unwrap();
         // SAFETY: 给静态变量初始化赋值，在new之后调用。
         unsafe {
             if let Some(completion) = &COMPLETION_FILE_OPS.as_mut() {
