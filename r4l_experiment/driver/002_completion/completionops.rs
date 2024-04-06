@@ -1,4 +1,3 @@
-
 use core::cell::UnsafeCell;
 use kernel::bindings;
 use kernel::prelude::*;
@@ -8,10 +7,11 @@ pub(crate) struct CompletionFileOps(UnsafeCell<bindings::completion>);
 
 static mut COMPLETION_FILE_OPS: Option<Pin<UniqueArc<CompletionFileOps>>> = None;
 
-
 impl CompletionFileOps {
     pub(crate) fn new() -> Result<()> {
         pr_info!("CompletionFile(new)\n");
+
+        // SAFETY: 给静态变量初始化。
         unsafe {
             COMPLETION_FILE_OPS = Some(Pin::from(UniqueArc::try_new(CompletionFileOps(
                 UnsafeCell::new(bindings::completion::default()),
@@ -21,6 +21,7 @@ impl CompletionFileOps {
     }
 
     pub(crate) fn init_completion() {
+        // SAFETY: 给静态变量初始化赋值，在new之后调用。
         unsafe {
             if let Some(completion) = &COMPLETION_FILE_OPS.as_mut() {
                 bindings::init_completion(completion.0.get());
@@ -30,6 +31,7 @@ impl CompletionFileOps {
     }
 
     pub(crate) fn wait_for_completion() {
+        // SAFETY: 在init_completion之后调用。
         unsafe {
             if let Some(completion) = &COMPLETION_FILE_OPS.as_mut() {
                 bindings::wait_for_completion(completion.0.get());
@@ -39,6 +41,7 @@ impl CompletionFileOps {
     }
 
     pub(crate) fn complete() {
+        // SAFETY: 在init_completion之后调用。
         unsafe {
             if let Some(completion) = &COMPLETION_FILE_OPS.as_mut() {
                 bindings::complete(completion.0.get());
